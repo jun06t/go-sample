@@ -12,6 +12,8 @@ var HandshakeConfig = plugin.HandshakeConfig{
 	MagicCookieValue: "hello",
 }
 
+const AuthPluginName = "authPlugin"
+
 type Auth interface {
 	Authenticate() bool
 }

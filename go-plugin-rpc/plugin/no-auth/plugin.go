@@ -32,7 +32,7 @@ func main() {
 	}
 	// pluginMap is the map of plugins we can dispense.
 	var pluginMap = map[string]plugin.Plugin{
-		"authPlugin": &common.AuthPlugin{Impl: auth},
+		common.AuthPluginName: &common.AuthPlugin{Impl: auth},
 	}
 
 	plugin.Serve(&plugin.ServeConfig{

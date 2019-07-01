@@ -32,7 +32,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	raw, err := rpcClient.Dispense("authPlugin")
+	raw, err := rpcClient.Dispense(common.AuthPluginName)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -46,5 +46,5 @@ func main() {
 }
 
 var pluginMap = map[string]plugin.Plugin{
-	"authPlugin": &common.AuthPlugin{},
+	common.AuthPluginName: &common.AuthPlugin{},
 }
