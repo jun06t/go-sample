@@ -18,12 +18,13 @@ type Auth interface {
 	Authenticate() bool
 }
 
-type AuthRPC struct {
+type AuthRPCClient struct {
 	client *rpc.Client
 }
 
-func (a *AuthRPC) Authenticate() bool {
+func (a *AuthRPCClient) Authenticate() bool {
 	var resp bool
+	// using net/rpc client's synchronous call.
 	err := a.client.Call("Plugin.Authenticate", new(interface{}), &resp)
 	if err != nil {
 		panic(err)
@@ -36,6 +37,8 @@ type AuthRPCServer struct {
 	Impl Auth
 }
 
+// Authenticate conforms to the requirements of the net/rpc server method.
+// https://golang.org/pkg/net/rpc/
 func (s *AuthRPCServer) Authenticate(args interface{}, resp *bool) error {
 	*resp = s.Impl.Authenticate()
 	return nil
@@ -50,5 +53,5 @@ func (p *AuthPlugin) Server(*plugin.MuxBroker) (interface{}, error) {
 }
 
 func (AuthPlugin) Client(b *plugin.MuxBroker, c *rpc.Client) (interface{}, error) {
-	return &AuthRPC{client: c}, nil
+	return &AuthRPCClient{client: c}, nil
 }
