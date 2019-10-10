@@ -10,7 +10,10 @@ import (
 func main() {
 	mux := http.NewServeMux()
 	mux.Handle("/", http.HandlerFunc(hello))
-	log.Fatal(http.ListenAndServe(":8080", mux))
+	svr := &http.Server{Addr: ":8080", Handler: mux}
+	//svr.SetKeepAlivesEnabled(false)
+
+	log.Fatal(svr.ListenAndServe())
 }
 
 func hello(w http.ResponseWriter, _ *http.Request) {
