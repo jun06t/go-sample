@@ -14,16 +14,7 @@ func main() {
 
 	go func() {
 		select {
-		case s := <-signal_chan:
-			_, err := fmt.Println("catch signal")
-			if err != nil {
-				if errors.Is(err, syscall.EPIPE) {
-					fmt.Fprintln(os.Stderr, "catch broken pipe error")
-				} else {
-					fmt.Fprintln(os.Stderr, err)
-				}
-			}
-			fmt.Fprintln(os.Stderr, s)
+		case <-signal_chan:
 			os.Exit(1)
 		}
 	}()
@@ -35,7 +26,11 @@ func run() {
 	for {
 		_, err := fmt.Println("run!")
 		if err != nil {
-			fmt.Fprintln(os.Stderr, "run error: ", err)
+			if errors.Is(err, syscall.EPIPE) {
+				fmt.Fprintln(os.Stderr, "catch broken pipe error")
+			} else {
+				fmt.Fprintln(os.Stderr, err)
+			}
 		}
 	}
 }
