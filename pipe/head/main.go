@@ -24,6 +24,7 @@ func main() {
 				}
 			}
 			fmt.Fprintln(os.Stderr, s)
+			os.Exit(1)
 		}
 	}()
 
@@ -32,6 +33,9 @@ func main() {
 
 func run() {
 	for {
-		fmt.Println("Wow!")
+		_, err := fmt.Println("run!")
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "run error: ", err)
+		}
 	}
 }
