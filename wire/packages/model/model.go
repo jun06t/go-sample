@@ -1,4 +1,4 @@
-package foo
+package model
 
 import "github.com/google/wire"
 

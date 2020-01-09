@@ -5,12 +5,16 @@
 
 package foo
 
+import (
+	"github.com/jun06t/go-sample/wire/packages/model"
+)
+
 // Injectors from wire.go:
 
 func initializeFooBarBaz() int {
-	foo := ProvideFoo()
-	bar := ProvideBar()
-	baz := ProvideBaz()
-	int2 := NewFooBarBaz(foo, bar, baz)
+	foo := model.ProvideFoo()
+	bar := model.ProvideBar()
+	baz := model.ProvideBaz()
+	int2 := model.NewFooBarBaz(foo, bar, baz)
 	return int2
 }
