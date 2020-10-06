@@ -21,8 +21,7 @@ func main() {
 	}
 	defer resp.Body.Close()
 
-	var r io.Reader = resp.Body
-	r = io.TeeReader(r, os.Stderr)
+	r := io.TeeReader(resp.Body, os.Stderr)
 
 	var foo Foo
 	err = json.NewDecoder(r).Decode(&foo)
