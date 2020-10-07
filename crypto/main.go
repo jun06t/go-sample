@@ -23,6 +23,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	fmt.Printf("cek: %x\n", cek)
 	ciphertext, err := encrypt(cek, data)
 	if err != nil {
 		log.Fatal(err)
@@ -52,6 +53,7 @@ func encryptCEK(password string, cek []byte) ([]byte, []byte, error) {
 	if err != nil {
 		return nil, nil, err
 	}
+	fmt.Printf("kek: %x\n", kek)
 
 	encrypted, err := encrypt(kek, cek)
 	if err != nil {
