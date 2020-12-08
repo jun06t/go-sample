@@ -6,22 +6,22 @@ import (
 )
 
 var (
-	mux   = new(sync.Mutex)
+	mu    sync.Mutex
 	hooks []func(context.Context)
 )
 
 // Add appends a hook function for shutdown.
 func Add(h func(ctx context.Context)) {
-	mux.Lock()
-	defer mux.Unlock()
+	mu.Lock()
+	defer mu.Unlock()
 
 	hooks = append(hooks, h)
 }
 
 // Invoke invokes shutdown hooks concurrently.
 func Invoke(ctx context.Context) error {
-	mux.Lock()
-	defer mux.Unlock()
+	mu.Lock()
+	defer mu.Unlock()
 
 	wg := new(sync.WaitGroup)
 	wg.Add(len(hooks))
