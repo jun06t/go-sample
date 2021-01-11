@@ -15,7 +15,9 @@ var (
 	target = "https://google.com"
 
 	cli1 = &http.Client{
-		Transport: &http2.Transport{},
+		Transport: &http2.Transport{
+			AllowHTTP: true,
+		},
 	}
 	cli2 = &http.Client{
 		Transport: &http.Transport{
@@ -37,7 +39,7 @@ func main() {
 	}
 
 	fmt.Printf("Connecting to %s...\n", target)
-	err := do(cli2, context.Background(), target)
+	err := do(cli1, context.Background(), target)
 	if err != nil {
 		panic(err)
 	}
