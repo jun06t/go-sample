@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	endpoints = []string{"localhost:2329", "localhost:12329", "localhost:22329"}
+	endpoints = []string{"localhost:2379", "localhost:12379", "localhost:22379"}
 )
 
 const (
