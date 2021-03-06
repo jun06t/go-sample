@@ -1,7 +1,7 @@
 version: "3"
 services:
   etcd1:
-    image: gcr.io/etcd-development/etcd:v3.4.15
+    image: gcr.io/etcd-development/etcd:v3.4.7
     ports:
       - "2379:2379"
     command: >-
@@ -15,8 +15,11 @@ services:
       -initial-cluster etcd1=http://etcd1:2380,etcd2=http://etcd2:2380,etcd3=http://etcd3:2380
       -initial-cluster-token etcd-cluster
       -initial-cluster-state new
+      -debug
   etcd2:
-    image: gcr.io/etcd-development/etcd:v3.4.15
+    image: gcr.io/etcd-development/etcd:v3.4.7
+    ports:
+      - "12379:2379"
     command: >-
       /usr/local/bin/etcd 
       -name etcd2 
@@ -28,8 +31,11 @@ services:
       -initial-cluster etcd1=http://etcd1:2380,etcd2=http://etcd2:2380,etcd3=http://etcd3:2380
       -initial-cluster-token etcd-cluster
       -initial-cluster-state new
+      -debug
   etcd3:
-    image: gcr.io/etcd-development/etcd:v3.4.15
+    image: gcr.io/etcd-development/etcd:v3.4.7
+    ports:
+      - "22379:2379"
     command: >-
       /usr/local/bin/etcd 
       -name etcd3 
@@ -41,4 +47,5 @@ services:
       -initial-cluster etcd1=http://etcd1:2380,etcd2=http://etcd2:2380,etcd3=http://etcd3:2380
       -initial-cluster-token etcd-cluster
       -initial-cluster-state new
+      -debug
 

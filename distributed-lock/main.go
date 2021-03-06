@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"time"
 
@@ -11,21 +10,22 @@ import (
 )
 
 var (
-	endpoints = []string{"localhost:2329"}
+	endpoints = []string{"localhost:2329", "localhost:12329", "localhost:22329"}
 )
 
 const (
-	lockTTL = 10 // second
+	lockTTL      = 10 // second
+	lockResource = "/my-lock/"
 )
 
 func main() {
-	cli, err := clientv3.New(clientv3.Config{Endpoints: endpoints})
+	cli, err := clientv3.New(clientv3.Config{Endpoints: endpoints, DialTimeout: 3 * time.Second})
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer cli.Close()
 
-	rev, unlocker, err := Lock(context.Background(), cli, "/my-lock/")
+	rev, unlocker, err := Lock(context.Background(), cli, lockResource)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -34,8 +34,9 @@ func main() {
 		if err := unlocker(context.Background()); err != nil {
 			log.Fatal(err)
 		}
+		log.Println("unlocked")
 	}()
-	fmt.Println("acquired lock rev:", rev)
+	log.Println("acquired lock rev:", rev)
 
 	// Some function that takes a long time to complete.
 	time.Sleep(5 * time.Second)
@@ -51,9 +52,9 @@ func Lock(ctx context.Context, cli *clientv3.Client, key string) (int64, func(co
 	ss.Orphan()
 
 	// acquire lock for ss
-	err = m.Lock(ctx)
+	//err = m.Lock(ctx)
 	// TryLock returns immediately if lock is held by another session.
-	// err = m.TryLock(ctx)
+	err = m.TryLock(ctx)
 	if err != nil {
 		return 0, nil, err
 	}
