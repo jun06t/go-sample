@@ -14,7 +14,7 @@ user_is_admin {
 allow {
 	input.method = "GET"
 	input.path = ["articles"]
-	has_permission(input.roles, "myservice.article.list")
+	has_permission(input.roles, "article.list")
 }
 
 # GET /articles/:id
@@ -22,14 +22,14 @@ allow {
 	some id
 	input.method = "GET"
 	input.path = ["articles", id]
-	has_permission(input.roles, "myservice.article.get")
+	has_permission(input.roles, "article.get")
 }
 
 # POST /articles
 allow {
 	input.method = "POST"
 	input.path = ["articles"]
-	has_permission(input.roles, "myservice.article.create")
+	has_permission(input.roles, "article.create")
 }
 
 # PUT /articles/:id
@@ -37,7 +37,7 @@ allow {
 	some id
 	input.method = "PUT"
 	input.path = ["articles", id]
-	has_permission(input.roles, "myservice.article.update")
+	has_permission(input.roles, "article.update")
 }
 
 # DELETE /articles/:id
@@ -45,7 +45,7 @@ allow {
 	some id
 	input.method = "DELETE"
 	input.path = ["articles", id]
-	has_permission(input.roles, "myservice.article.delete")
+	has_permission(input.roles, "article.delete")
 }
 
 has_permission(roles, p) {

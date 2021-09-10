@@ -1,21 +1,21 @@
 {
 	"role_permissions": {
 		"article.admin": [
-			"myservice.article.create",
-			"myservice.article.update",
-			"myservice.article.list",
-			"myservice.article.get",
-			"myservice.article.delete"
+			"article.create",
+			"article.update",
+			"article.list",
+			"article.get",
+			"article.delete"
 		],
 		"article.editor": [
-			"myservice.article.create",
-			"myservice.article.update",
-			"myservice.article.list",
-			"myservice.article.get"
+			"article.create",
+			"article.update",
+			"article.list",
+			"article.get"
 		],
 		"article.viewer": [
-			"myservice.article.list",
-			"myservice.article.get"
+			"article.list",
+			"article.get"
 		]
 	}
 }
