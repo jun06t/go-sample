@@ -58,16 +58,16 @@ func deleteArticle(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, fmt.Sprintf("deleted %s\n", id))
 }
 
-type Input struct {
-	Input User `json:"input"`
+type data struct {
+	Input input `json:"input"`
 }
-type User struct {
+type input struct {
 	Method string   `json:"method"`
 	Path   []string `json:"path"`
 	Roles  []string `json:"roles"`
 }
 
-type Result struct {
+type result struct {
 	Result bool `json:"result"`
 }
 
@@ -76,9 +76,10 @@ func opaMiddleware(next http.Handler) http.Handler {
 		ctx := r.Context()
 		trimed := strings.Trim(r.URL.Path, "/")
 		p := strings.Split(trimed, "/")
+		// NOTE: コンテキストからユーザ情報の取得→ロールの設定
 		userRoles := []string{"article.editor"}
-		input := Input{
-			Input: User{
+		input := data{
+			Input: input{
 				Method: r.Method,
 				Path:   p,
 				Roles:  userRoles,
@@ -92,7 +93,7 @@ func opaMiddleware(next http.Handler) http.Handler {
 		}
 		defer resp.Body.Close()
 
-		res := Result{}
+		res := result{}
 		err = json.NewDecoder(resp.Body).Decode(&res)
 		if !res.Result {
 			w.WriteHeader(http.StatusForbidden)
