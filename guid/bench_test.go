@@ -29,3 +29,10 @@ func BenchmarkGenUUID(b *testing.B) {
 		GenUUID()
 	}
 }
+
+func BenchmarkGenToken(b *testing.B) {
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		GenToken()
+	}
+}

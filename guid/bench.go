@@ -1,7 +1,9 @@
 package main
 
 import (
+	"crypto/rand"
 	"encoding/base32"
+	"encoding/base64"
 	"encoding/binary"
 	"fmt"
 
@@ -23,7 +25,9 @@ func init() {
 }
 
 func main() {
-	fmt.Println(GenXID())
+	for i := 0; i < 1000; i++ {
+		fmt.Println(GenXID())
+	}
 	fmt.Printf("%x\n", GenSonyflake())
 	fmt.Println(GenSonyflakeStr())
 	fmt.Println(GenUUID())
@@ -53,4 +57,15 @@ func GenSonyflakeStr() string {
 
 func GenUUID() string {
 	return uuid.NewString()
+}
+
+const length = 16
+
+func GenToken() string {
+	b := make([]byte, length)
+	_, err := rand.Read(b)
+	if err != nil {
+		return ""
+	}
+	return base64.RawURLEncoding.EncodeToString(b)
 }
