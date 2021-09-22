@@ -8,6 +8,8 @@ import (
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+
+	"github.com/jun06t/go-sample/zap/log"
 )
 
 func main() {
@@ -32,6 +34,11 @@ func main() {
 		logger.Error("error message")
 		logger.Info("info message")
 		logger.Debug("debug message")
+	}
+
+	{
+		log.Info("info message")
+		log.Error("error message")
 	}
 }
 
