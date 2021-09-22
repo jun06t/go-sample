@@ -44,10 +44,11 @@ func main() {
 
 func NewWithWriter(w io.Writer) *zap.Logger {
 	sink := zapcore.AddSync(w)
+	lsink := zapcore.Lock(sink)
 
 	enc := zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig())
 
-	core := zapcore.NewCore(enc, sink, zapcore.InfoLevel)
+	core := zapcore.NewCore(enc, lsink, zapcore.InfoLevel)
 
 	logger := zap.New(core)
 	return logger
