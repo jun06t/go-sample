@@ -1,0 +1,8 @@
+version: '3'
+services:
+  bigtable:
+    image: jun06t/bigtable-emulator
+    container_name: bigtable
+    ports:
+     - "8086:8086"
+
