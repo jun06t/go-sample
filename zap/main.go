@@ -77,6 +77,7 @@ func NewMultiOutputLogger() *zap.Logger {
 
 func NewCloudLoggingLogger() *zap.Logger {
 	cfg := zap.NewProductionConfig()
+	cfg.InitialFields = map[string]interface{}{"appVersion": "v1.0.0"}
 	cfg.EncoderConfig = newEncoderConfig()
 	logger, _ := cfg.Build()
 	return logger
