@@ -30,14 +30,15 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	writer, err := bigtable.NewClientWithConfig(context.Background(), projectID, instanceID, bigtable.ClientConfig{
+	ctx := context.Background()
+	writer, err := bigtable.NewClientWithConfig(ctx, projectID, instanceID, bigtable.ClientConfig{
 		AppProfile: "writer",
 	})
 	if err != nil {
 		panic(err)
 	}
 	defer writer.Close()
-	reader, err := bigtable.NewClientWithConfig(context.Background(), projectID, instanceID, bigtable.ClientConfig{
+	reader, err := bigtable.NewClientWithConfig(ctx, projectID, instanceID, bigtable.ClientConfig{
 		AppProfile: "reader",
 	})
 	if err != nil {
@@ -65,7 +66,7 @@ func main() {
 }
 
 func writeAndRead(client *Client) (bool, error) {
-	rowKey := "write once"
+	rowKey := "key1"
 	now := time.Now().UnixNano()
 	in := strconv.FormatInt(now, 10)
 	err := client.write(rowKey, columnFamilyName, in)
@@ -88,6 +89,22 @@ func (c *Client) write(rowKey, columnFamilyName, value string) error {
 	mut.Set(columnFamilyName, columnQualifier, bigtable.Timestamp(0), []byte(value))
 
 	if err := c.writer.Apply(context.Background(), rowKey, mut); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *Client) writeOnce(rowKey, columnFamilyName, value string) error {
+	mut := bigtable.NewMutation()
+	mut.Set(columnFamilyName, columnQualifier, bigtable.Timestamp(0), []byte(value))
+
+	filter := bigtable.ChainFilters(
+		bigtable.FamilyFilter(columnFamilyName),
+	)
+	conditionalMutation := bigtable.NewCondMutation(filter, nil, mut)
+
+	if err := c.writer.Apply(context.Background(), rowKey, conditionalMutation); err != nil {
 		return err
 	}
 
