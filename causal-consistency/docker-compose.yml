@@ -1,0 +1,32 @@
+version: "3"
+services:
+  primary:
+    image: mongo
+    restart: always
+    ports:
+      - 27017:27017
+    command:
+      - --replSet
+      - rs0
+      - --port
+      - "27017"
+  secondary1:
+    image: mongo
+    restart: always
+    ports:
+      - 27018:27018
+    command:
+      - --replSet
+      - rs0
+      - --port
+      - "27018"
+  secondary2:
+    image: mongo
+    restart: always
+    ports:
+      - 27019:27019
+    command:
+      - --replSet
+      - rs0
+      - --port
+      - "27019"
