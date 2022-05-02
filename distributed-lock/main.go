@@ -52,9 +52,9 @@ func Lock(ctx context.Context, cli *clientv3.Client, key string) (int64, func(co
 	ss.Orphan()
 
 	// acquire lock for ss
-	//err = m.Lock(ctx)
+	err = m.Lock(ctx)
 	// TryLock returns immediately if lock is held by another session.
-	err = m.TryLock(ctx)
+	//err = m.TryLock(ctx)
 	if err != nil {
 		return 0, nil, err
 	}
