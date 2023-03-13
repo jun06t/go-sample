@@ -64,6 +64,22 @@ func (m *Client) UpdateUser(ctx context.Context, u User) error {
 	return nil
 }
 
+func (m *Client) UpdateUserRaw(ctx context.Context, u User) error {
+	col := m.cli.Database(dbName).Collection(colName)
+	opt := options.Update().SetUpsert(true)
+	_, err := col.UpdateOne(ctx, bson.M{"_id": u.ID}, bson.M{
+		"$set": bson.M{
+			"age":             u.Age,
+			"address.city":    u.Address.City,
+			"address.zipcode": u.Address.Zipcode,
+		},
+	}, opt)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (m *Client) UpdateUserWithInline(ctx context.Context, u UserWithInline) error {
 	col := m.cli.Database(dbName).Collection(colName)
 	opt := options.Update().SetUpsert(true)
