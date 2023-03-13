@@ -10,6 +10,11 @@ user_is_admin {
 	input.roles[_] = "admin"
 }
 
+role[p] {
+	r := input.roles[_]
+	p = data.role_permissions[r][_] 
+}
+
 # GET /articles
 allow {
 	input.method = "GET"
