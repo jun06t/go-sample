@@ -23,7 +23,8 @@ func main() {
 }
 
 type handler struct {
-	cli pb.GreeterClient
+	cli  pb.GreeterClient
+	hcli http.Client
 }
 
 func newHandler(addr string) *handler {
@@ -33,7 +34,14 @@ func newHandler(addr string) *handler {
 	}
 	c := pb.NewGreeterClient(conn)
 
-	return &handler{cli: c}
+	hc := http.Client{
+		Transport: http.DefaultTransport,
+	}
+
+	return &handler{
+		cli:  c,
+		hcli: hc,
+	}
 }
 
 func (h *handler) alive(w http.ResponseWriter, r *http.Request) {
@@ -47,6 +55,12 @@ func (h *handler) hello(w http.ResponseWriter, r *http.Request) {
 		Man:  true,
 	}
 	_, err := h.cli.SayHello(context.Background(), req)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	hreq, err := http.NewRequest("GET", "http://httpbin.org/delay/2", nil)
+	_, err = h.hcli.Do(hreq)
 	if err != nil {
 		log.Fatal(err)
 	}
