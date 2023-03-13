@@ -5,17 +5,15 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"google.golang.org/grpc"
 
 	pb "github.com/jun06t/go-sample/opentelemetry/proto"
 )
 
-const (
-	backend = "localhost:8080"
-)
-
 func main() {
+	backend := os.Getenv("BACKEND_ADDR")
 	h := newHandler(backend)
 
 	mux := http.NewServeMux()
@@ -25,11 +23,11 @@ func main() {
 }
 
 type handler struct {
-	cli grpc.Client
+	cli pb.GreeterClient
 }
 
 func newHandler(addr string) *handler {
-	conn, err := grpc.Dial(backend, grpc.WithInsecure())
+	conn, err := grpc.Dial(addr, grpc.WithInsecure())
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -48,7 +46,7 @@ func (h *handler) hello(w http.ResponseWriter, r *http.Request) {
 		Age:  10,
 		Man:  true,
 	}
-	resp, err := h.cli.SayHello(context.Background(), req)
+	_, err := h.cli.SayHello(context.Background(), req)
 	if err != nil {
 		log.Fatal(err)
 	}

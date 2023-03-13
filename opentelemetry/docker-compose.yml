@@ -6,6 +6,8 @@ services:
       context: ./gateway/
     ports:
       - 8000:8000
+    environment:
+      - BACKEND_ADDR=backend:8080
   backend:
     build:
       context: ./backend/
