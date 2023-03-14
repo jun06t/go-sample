@@ -8,6 +8,7 @@ services:
       - 8000:8000
     environment:
       - BACKEND_ADDR=backend:8080
+      - EXPORTER_ENDPOINT=http://jaeger:14268/api/traces
   backend:
     build:
       context: ./backend/
