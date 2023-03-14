@@ -3,7 +3,10 @@ version: "3"
 services:
   gateway:
     build:
-      context: ./gateway/
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - TARGET=gateway
     ports:
       - 8000:8000
     environment:
@@ -11,7 +14,12 @@ services:
       - EXPORTER_ENDPOINT=http://jaeger:14268/api/traces
   backend:
     build:
-      context: ./backend/
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - TARGET=backend
+    environment:
+      - EXPORTER_ENDPOINT=http://jaeger:14268/api/traces
   jaeger:
     image: "jaegertracing/all-in-one:1.42"
     ports:

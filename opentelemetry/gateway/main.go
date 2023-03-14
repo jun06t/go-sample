@@ -22,18 +22,18 @@ var tracer trace.Tracer
 func main() {
 	backend := os.Getenv("BACKEND_ADDR")
 
-	tp, cleanup, err := telemetry.NewTracerProvider("otel-sample")
+	_, cleanup, err := telemetry.NewTracerProvider("otel-sample")
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer cleanup()
-	tracer = otel.Tracer()
+	tracer = otel.Tracer("gateway")
 
 	h := newHandler(backend)
 
 	mux := http.NewServeMux()
 	mux.Handle("/", http.HandlerFunc(h.alive))
-	mux.Handle("/hello", telemetry.NewHTTPMiddleware(h.hello))
+	mux.Handle("/hello", telemetry.NewHTTPMiddleware()(http.HandlerFunc(h.hello)))
 	http.ListenAndServe(":8000", mux)
 }
 
@@ -43,7 +43,10 @@ type handler struct {
 }
 
 func newHandler(addr string) *handler {
-	conn, err := grpc.Dial(addr, grpc.WithInsecure())
+	conn, err := grpc.Dial(addr,
+		grpc.WithInsecure(),
+		grpc.WithUnaryInterceptor(telemetry.NewUnaryClientInterceptor()),
+	)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -90,5 +93,5 @@ func (h *handler) hello(w http.ResponseWriter, r *http.Request) {
 func Sleep(ctx context.Context) {
 	_, span := tracer.Start(ctx, "sleep")
 	defer span.End()
-	time.Sleep(1 * time.Second)
+	time.Sleep(100 * time.Millisecond)
 }
