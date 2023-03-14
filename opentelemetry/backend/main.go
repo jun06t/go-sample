@@ -5,9 +5,12 @@ import (
 	"log"
 	"net"
 
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc/filters"
 	"google.golang.org/grpc"
 
 	pb "github.com/jun06t/go-sample/opentelemetry/proto"
+	"github.com/jun06t/go-sample/opentelemetry/telemetry"
 )
 
 const (
@@ -27,7 +30,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	s := grpc.NewServer()
+	s := grpc.NewServer(grpc.UnaryInterceptor(telemetry.NewUnaryServerInterceptor()))
 	pb.RegisterGreeterServer(s, &server{})
 	err = s.Serve(lis)
 	if err != nil {
