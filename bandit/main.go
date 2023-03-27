@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 	"fmt"
+	"image/color"
+	"log"
 	"math/rand"
 	"time"
 
@@ -10,24 +12,34 @@ import (
 	"github.com/stitchfix/mab/numint"
 	erand "golang.org/x/exp/rand"
 	"gonum.org/v1/gonum/stat/distuv"
+	"gonum.org/v1/plot"
+	"gonum.org/v1/plot/plotter"
+	"gonum.org/v1/plot/vg"
 )
 
 func main() {
-	arm0 := newArm(0.03)
-	arm1 := newArm(0.02)
-	arm2 := newArm(0.01)
+	arms := Arms{
+		newArm(0.6),
+		newArm(0.4),
+		newArm(0.1),
+	}
 
-	ThompsonSampling(1000, arm0, arm1, arm2)
+	ThompsonSampling(1000, arms...)
 
-	fmt.Printf("コンテンツ0 試行回数: %d, CV回数: %d\n", arm0.total(), arm0.alpha)
-	fmt.Printf("コンテンツ1 試行回数: %d, CV回数: %d\n", arm1.total(), arm1.alpha)
-	fmt.Printf("コンテンツ2 試行回数: %d, CV回数: %d\n", arm2.total(), arm2.alpha)
+	for i := range arms {
+		fmt.Printf("コンテンツ%d 試行回数: %d, CV回数: %d\n", i, arms[i].total(), arms[i].alpha)
+	}
+	err := arms.plot()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// check by another library
-	rewards := []mab.Dist{
-		mab.Beta(float64(arm0.alpha+1), float64(arm0.beta+1)),
-		mab.Beta(float64(arm1.alpha+1), float64(arm1.beta+1)),
-		mab.Beta(float64(arm2.alpha+1), float64(arm2.beta+1)),
+	rewards := []mab.Dist{}
+	for i := range arms {
+		rewards = append(rewards,
+			mab.Beta(float64(arms[i].alpha+1), float64(arms[i].beta+1)),
+		)
 	}
 
 	b := mab.Bandit{
@@ -38,7 +50,7 @@ func main() {
 
 	result, err := b.SelectArm(context.Background(), "12345", nil)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 	fmt.Println(result.Arm)
 }
@@ -62,6 +74,44 @@ func (a Arms) next() *Arm {
 		}
 	}
 	return a[idx]
+}
+
+func (a Arms) plot() error {
+	// Create a new plot and set its dimensions.
+	p := plot.New()
+	p.X.Label.Text = "Reward Probability"
+	p.Y.Label.Text = "Density"
+	p.Y.Min = 0
+
+	for _, arm := range a {
+		// Create the data for the plot.
+		pts := make(plotter.XYs, 100)
+		for i := range pts {
+			x := float64(i) / float64(len(pts)-1)
+			pts[i].X = x
+			pts[i].Y = distuv.Beta{Alpha: float64(arm.alpha + 1), Beta: float64(arm.beta + 1)}.Prob(x)
+		}
+
+		// Create a line plotter and add it to the plot.
+		lp, err := plotter.NewLine(pts)
+		if err != nil {
+			return err
+		}
+		lp.LineStyle.Width = vg.Points(1)
+		lp.LineStyle.Color = color.RGBA{
+			R: uint8(rand.Intn(255)),
+			G: uint8(rand.Intn(255)),
+			B: uint8(rand.Intn(255)),
+			A: 255,
+		}
+		p.Add(lp)
+	}
+
+	// Save the plot to a PNG file.
+	if err := p.Save(4*vg.Inch, 4*vg.Inch, "arm_distribution.png"); err != nil {
+		return err
+	}
+	return nil
 }
 
 type Arm struct {
@@ -95,4 +145,8 @@ func (a *Arm) sampling() float64 {
 		Src:   erand.NewSource(uint64(time.Now().Nanosecond())),
 	}
 	return bd.Rand()
+}
+
+func plotArmDistribution(alpha, beta float64) error {
+	return nil
 }
