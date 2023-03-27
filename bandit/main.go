@@ -146,7 +146,3 @@ func (a *Arm) sampling() float64 {
 	}
 	return bd.Rand()
 }
-
-func plotArmDistribution(alpha, beta float64) error {
-	return nil
-}
