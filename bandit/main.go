@@ -10,15 +10,15 @@ import (
 )
 
 func main() {
-	arm1 := newArm(0.8)
-	arm2 := newArm(0.6)
-	arm3 := newArm(0.3)
+	arm1 := newArm(0.03)
+	arm2 := newArm(0.02)
+	arm3 := newArm(0.01)
 
 	ThompsonSampling(1000, arm1, arm2, arm3)
 
-	fmt.Printf("試行回数: %d, CV回数: %d\n", arm1.total(), arm1.alpha)
-	fmt.Printf("試行回数: %d, CV回数: %d\n", arm2.total(), arm2.alpha)
-	fmt.Printf("試行回数: %d, CV回数: %d\n", arm3.total(), arm3.alpha)
+	fmt.Printf("コンテンツA 試行回数: %d, CV回数: %d\n", arm1.total(), arm1.alpha)
+	fmt.Printf("コンテンツB 試行回数: %d, CV回数: %d\n", arm2.total(), arm2.alpha)
+	fmt.Printf("コンテンツC 試行回数: %d, CV回数: %d\n", arm3.total(), arm3.alpha)
 }
 
 func ThompsonSampling(pull int, arms ...*Arm) {
