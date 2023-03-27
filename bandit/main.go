@@ -1,24 +1,46 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"math/rand"
 	"time"
 
+	"github.com/stitchfix/mab"
+	"github.com/stitchfix/mab/numint"
 	erand "golang.org/x/exp/rand"
 	"gonum.org/v1/gonum/stat/distuv"
 )
 
 func main() {
-	arm1 := newArm(0.03)
-	arm2 := newArm(0.02)
-	arm3 := newArm(0.01)
+	arm0 := newArm(0.03)
+	arm1 := newArm(0.02)
+	arm2 := newArm(0.01)
 
-	ThompsonSampling(1000, arm1, arm2, arm3)
+	ThompsonSampling(1000, arm0, arm1, arm2)
 
-	fmt.Printf("コンテンツA 試行回数: %d, CV回数: %d\n", arm1.total(), arm1.alpha)
-	fmt.Printf("コンテンツB 試行回数: %d, CV回数: %d\n", arm2.total(), arm2.alpha)
-	fmt.Printf("コンテンツC 試行回数: %d, CV回数: %d\n", arm3.total(), arm3.alpha)
+	fmt.Printf("コンテンツ0 試行回数: %d, CV回数: %d\n", arm0.total(), arm0.alpha)
+	fmt.Printf("コンテンツ1 試行回数: %d, CV回数: %d\n", arm1.total(), arm1.alpha)
+	fmt.Printf("コンテンツ2 試行回数: %d, CV回数: %d\n", arm2.total(), arm2.alpha)
+
+	// check by another library
+	rewards := []mab.Dist{
+		mab.Beta(float64(arm0.alpha+1), float64(arm0.beta+1)),
+		mab.Beta(float64(arm1.alpha+1), float64(arm1.beta+1)),
+		mab.Beta(float64(arm2.alpha+1), float64(arm2.beta+1)),
+	}
+
+	b := mab.Bandit{
+		RewardSource: &mab.RewardStub{Rewards: rewards},
+		Strategy:     mab.NewThompson(numint.NewQuadrature()),
+		Sampler:      mab.NewSha1Sampler(),
+	}
+
+	result, err := b.SelectArm(context.Background(), "12345", nil)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(result.Arm)
 }
 
 func ThompsonSampling(pull int, arms ...*Arm) {

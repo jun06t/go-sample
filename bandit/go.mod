@@ -4,4 +4,7 @@ go 1.20
 
 require gonum.org/v1/gonum v0.12.0
 
-require golang.org/x/exp v0.0.0-20191002040644-a1355ae1e2c3
+require (
+	github.com/stitchfix/mab v0.1.1
+	golang.org/x/exp v0.0.0-20200224162631-6cc2880d07d6
+)
