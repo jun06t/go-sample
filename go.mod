@@ -13,7 +13,7 @@ require (
 	github.com/sony/sonyflake v1.0.0
 	github.com/tcnksm/go-httpstat v0.2.0
 	go.uber.org/zap v1.24.0
-	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519
+	golang.org/x/crypto v0.1.0
 	golang.org/x/lint v0.0.0-20201208152925-83fdc39ff7b5 // indirect
 	golang.org/x/net v0.7.0
 	google.golang.org/genproto v0.0.0-20201214200347-8c77b98c765d // indirect
