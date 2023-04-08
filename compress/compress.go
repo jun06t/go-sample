@@ -1,6 +1,7 @@
 package main
 
 import (
+	"compress/flate"
 	"compress/gzip"
 	"io"
 	"net/http"
@@ -29,6 +30,11 @@ func factory(w http.ResponseWriter, r *http.Request) CustomResponseWriter {
 		w.Header().Set("Content-Encoding", "gzip")
 		return &gzipResponseWriter{ResponseWriter: w, gz: gzWriter}
 	}
+	if strings.Contains(r.Header.Get("Accept-Encoding"), "deflate") {
+		flWriter, _ := flate.NewWriter(w, 5)
+		w.Header().Set("Content-Encoding", "deflate")
+		return &deflateResponseWriter{ResponseWriter: w, fl: flWriter}
+	}
 	return &noop{}
 }
 
@@ -43,6 +49,19 @@ type noop struct {
 
 func (n *noop) Close() error {
 	return nil
+}
+
+type deflateResponseWriter struct {
+	http.ResponseWriter
+	fl *flate.Writer
+}
+
+func (rw *deflateResponseWriter) Write(b []byte) (int, error) {
+	return rw.fl.Write(b)
+}
+
+func (rw *deflateResponseWriter) Close() error {
+	return rw.fl.Close()
 }
 
 type brotliResponseWriter struct {
