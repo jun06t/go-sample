@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"sync"
 
 	"github.com/andybalholm/brotli"
 )
@@ -19,19 +20,43 @@ func middleware(next http.Handler) http.Handler {
 	})
 }
 
+var brotliPool = sync.Pool{
+	New: func() interface{} {
+		return brotli.NewWriter(nil)
+	},
+}
+
+var gzipPool = sync.Pool{
+	New: func() interface{} {
+		return gzip.NewWriter(nil)
+	},
+}
+
+const flateLevel = 5
+
+var flatePool = sync.Pool{
+	New: func() interface{} {
+		w, _ := flate.NewWriter(nil, flateLevel)
+		return w
+	},
+}
+
 func factory(w http.ResponseWriter, r *http.Request) CustomResponseWriter {
 	if strings.Contains(r.Header.Get("Accept-Encoding"), "br") {
-		br := brotli.NewWriter(w)
+		br := brotliPool.Get().(*brotli.Writer)
+		br.Reset(w)
 		w.Header().Set("Content-Encoding", "br")
 		return &brotliResponseWriter{ResponseWriter: w, br: br}
 	}
 	if strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
-		gzWriter := gzip.NewWriter(w)
+		gzWriter := gzipPool.Get().(*gzip.Writer)
+		gzWriter.Reset(w)
 		w.Header().Set("Content-Encoding", "gzip")
 		return &gzipResponseWriter{ResponseWriter: w, gz: gzWriter}
 	}
 	if strings.Contains(r.Header.Get("Accept-Encoding"), "deflate") {
-		flWriter, _ := flate.NewWriter(w, 5)
+		flWriter := flatePool.Get().(*flate.Writer)
+		flWriter.Reset(w)
 		w.Header().Set("Content-Encoding", "deflate")
 		return &deflateResponseWriter{ResponseWriter: w, fl: flWriter}
 	}
@@ -61,6 +86,7 @@ func (rw *deflateResponseWriter) Write(b []byte) (int, error) {
 }
 
 func (rw *deflateResponseWriter) Close() error {
+	defer flatePool.Put(rw.fl)
 	return rw.fl.Close()
 }
 
@@ -74,6 +100,7 @@ func (rw *brotliResponseWriter) Write(b []byte) (int, error) {
 }
 
 func (rw *brotliResponseWriter) Close() error {
+	defer brotliPool.Put(rw.br)
 	return rw.br.Close()
 }
 
@@ -83,6 +110,7 @@ type gzipResponseWriter struct {
 }
 
 func (g *gzipResponseWriter) Write(b []byte) (int, error) {
+	defer gzipPool.Put(g.gz)
 	return g.gz.Write(b)
 }
 
