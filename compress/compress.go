@@ -13,7 +13,8 @@ import (
 
 func middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		cw := factory(w, r)
+		cw, cleanup := factory(w, r)
+		defer cleanup()
 		defer cw.Close()
 
 		next.ServeHTTP(cw, r)
@@ -41,26 +42,40 @@ var flatePool = sync.Pool{
 	},
 }
 
-func factory(w http.ResponseWriter, r *http.Request) CustomResponseWriter {
+func factory(w http.ResponseWriter, r *http.Request) (CustomResponseWriter, func()) {
 	if strings.Contains(r.Header.Get("Accept-Encoding"), "br") {
 		br := brotliPool.Get().(*brotli.Writer)
 		br.Reset(w)
+		cleanup := func() {
+			brotliPool.Put(br)
+		}
 		w.Header().Set("Content-Encoding", "br")
-		return &brotliResponseWriter{ResponseWriter: w, br: br}
+		return &brotliResponseWriter{ResponseWriter: w, br: br}, cleanup
 	}
 	if strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
+		/*
+			gzWriter := gzip.NewWriter(w)
+			cleanup := func() {}
+		*/
+
 		gzWriter := gzipPool.Get().(*gzip.Writer)
 		gzWriter.Reset(w)
+		cleanup := func() {
+			gzipPool.Put(gzWriter)
+		}
 		w.Header().Set("Content-Encoding", "gzip")
-		return &gzipResponseWriter{ResponseWriter: w, gz: gzWriter}
+		return &gzipResponseWriter{ResponseWriter: w, gz: gzWriter}, cleanup
 	}
 	if strings.Contains(r.Header.Get("Accept-Encoding"), "deflate") {
 		flWriter := flatePool.Get().(*flate.Writer)
 		flWriter.Reset(w)
+		cleanup := func() {
+			flatePool.Put(flWriter)
+		}
 		w.Header().Set("Content-Encoding", "deflate")
-		return &deflateResponseWriter{ResponseWriter: w, fl: flWriter}
+		return &deflateResponseWriter{ResponseWriter: w, fl: flWriter}, cleanup
 	}
-	return &noop{}
+	return &noop{}, func() {}
 }
 
 type CustomResponseWriter interface {
@@ -86,7 +101,6 @@ func (rw *deflateResponseWriter) Write(b []byte) (int, error) {
 }
 
 func (rw *deflateResponseWriter) Close() error {
-	defer flatePool.Put(rw.fl)
 	return rw.fl.Close()
 }
 
@@ -100,7 +114,6 @@ func (rw *brotliResponseWriter) Write(b []byte) (int, error) {
 }
 
 func (rw *brotliResponseWriter) Close() error {
-	defer brotliPool.Put(rw.br)
 	return rw.br.Close()
 }
 
@@ -110,7 +123,6 @@ type gzipResponseWriter struct {
 }
 
 func (g *gzipResponseWriter) Write(b []byte) (int, error) {
-	defer gzipPool.Put(g.gz)
 	return g.gz.Write(b)
 }
 

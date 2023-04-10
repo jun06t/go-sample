@@ -4,9 +4,13 @@ import (
 	"io"
 	"net/http"
 	"os"
+
+	"github.com/pkg/profile"
 )
 
 func main() {
+	defer profile.Start(profile.MemProfile, profile.ProfilePath(".")).Stop()
+
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
