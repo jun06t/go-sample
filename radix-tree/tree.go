@@ -1,14 +1,8 @@
 package main
 
 import (
-	"net/http"
 	"strings"
 )
-
-type Route struct {
-	Path    string `json:"path"`
-	handler http.HandlerFunc
-}
 
 type Node[T any] struct {
 	Part     string     `json:"part"`
