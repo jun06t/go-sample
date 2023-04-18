@@ -28,7 +28,7 @@ func main() {
 		{Path: "/foo", handler: Index},
 	}
 
-	tree := &Node{}
+	tree := &Node[Route]{}
 	for _, route := range routes {
 		tree.insert(route.Path, route)
 	}
