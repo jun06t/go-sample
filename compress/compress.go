@@ -23,6 +23,7 @@ func middleware(next http.Handler) http.Handler {
 
 var brotliPool = sync.Pool{
 	New: func() interface{} {
+		//return brotli.NewWriterOptions(nil, brotli.WriterOptions{Quality: 11, LGWin: 22})
 		return brotli.NewWriter(nil)
 	},
 }
