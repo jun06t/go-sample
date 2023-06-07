@@ -1,0 +1,4 @@
+---
+endpoint: https://example.com
+timeout: 0s
+  #retry: 0
