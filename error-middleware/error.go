@@ -40,6 +40,9 @@ func (w *statusResponseWriter) WriteHeader(status int) {
 
 var errorContextKey struct{}
 
+// WithError attaches an error to the request's context.
+// It modifies the request in place to ensure that later middleware and handlers
+// using the original pointer to the request can access the updated context.
 func WithError(r *http.Request, err error) {
 	if err == nil {
 		return
