@@ -1,6 +1,8 @@
 package main
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"os"
 
 	"github.com/kelseyhightower/envconfig"
@@ -19,6 +21,7 @@ func (c Config) MarshalLogObject(enc zapcore.ObjectEncoder) error {
 	enc.AddString("addr", c.Addr)
 	enc.AddInt("port", c.Port)
 	enc.AddString("password", "****") // パスワードをマスク
+	//enc.AddString("password", hash(c.Password))
 	return nil
 }
 
@@ -46,4 +49,16 @@ func main() {
 	defer logger.Sync()
 	logger.Info("zap", zap.Object("config", conf))
 	slogger.Info("slog", "config", conf)
+}
+
+const (
+	hashPrefixLength = 8
+)
+
+// hash returns sha256 hash value of input string.
+// You can confirm hash value on terminal as follows:
+// $ echo -n "default" | shasum -a 256
+func hash(in string) string {
+	hash := sha256.Sum256([]byte(in))
+	return hex.EncodeToString(hash[:])[:hashPrefixLength] + "****"
 }
