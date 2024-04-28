@@ -39,8 +39,13 @@ func (c *Config) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return nil
 }
 
-type Config struct {
+type ServerParams struct {
 	Endpoint string        `yaml:"endpoint"`
 	Timeout  time.Duration `yaml:"timeout" default:"10s"`
 	Retry    int           `yaml:"retry" default:"3"`
+}
+
+type Config struct {
+	Params ServerParams `yaml:"params"`
+	Key    string       `yaml:"key"`
 }

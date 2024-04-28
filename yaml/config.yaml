@@ -1,4 +1,9 @@
 ---
-endpoint: https://example.com
-timeout: 0s
-  #retry: 0
+params:
+  endpoint: https://example.com
+  timeout: 0s
+  retry: 0
+key: |-
+  -----BEGIN PUBLIC KEY-----
+  MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA7v6LsXjyw...
+  -----END PUBLIC KEY-----
