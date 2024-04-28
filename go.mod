@@ -11,7 +11,7 @@ require (
 	github.com/sony/sonyflake v1.0.0
 	github.com/tcnksm/go-httpstat v0.2.0
 	go.uber.org/zap v1.24.0
-	golang.org/x/crypto v0.1.0
-	golang.org/x/net v0.7.0
+	golang.org/x/crypto v0.17.0
+	golang.org/x/net v0.10.0
 	google.golang.org/grpc v1.53.0 // indirect
 )
