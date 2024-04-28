@@ -1,22 +1,28 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"log"
 	"os"
 	"time"
 
 	"github.com/creasty/defaults"
+	"github.com/kelseyhightower/envconfig"
 	"gopkg.in/yaml.v3"
 )
 
-func main() {
-	var fp string
-	flag.StringVar(&fp, "c", "./config.yaml", "set yaml file path")
-	flag.Parse()
+type EnvVars struct {
+	ConfigPath string `split_words:"true" default:"./config.yaml"`
+}
 
-	b, err := os.ReadFile(fp)
+func main() {
+	var s EnvVars
+	err := envconfig.Process("", &s)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	b, err := os.ReadFile(s.ConfigPath)
 	if err != nil {
 		log.Fatal(err)
 	}
