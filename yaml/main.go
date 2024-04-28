@@ -3,8 +3,8 @@ package main
 import (
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"log"
+	"os"
 	"time"
 
 	"github.com/creasty/defaults"
@@ -16,7 +16,7 @@ func main() {
 	flag.StringVar(&fp, "c", "./config.yaml", "set yaml file path")
 	flag.Parse()
 
-	b, err := ioutil.ReadFile(fp)
+	b, err := os.ReadFile(fp)
 	if err != nil {
 		log.Fatal(err)
 	}
