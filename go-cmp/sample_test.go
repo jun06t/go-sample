@@ -1,7 +1,6 @@
 package mycmp_test
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -28,10 +27,22 @@ func TestNewUser(t *testing.T) {
 			in: in{
 				name: "alice",
 				age:  20,
+				address: &mycmp.Address{
+					ZipCode: "102-0101",
+					Pref:    "Tokyo",
+					City:    "Chiyoda",
+					Street:  "Kokyo 1-1-1",
+				},
 			},
 			out: mycmp.User{
 				Name: "alice",
 				Age:  20,
+				Address: mycmp.Address{
+					ZipCode: "102-0101",
+					Pref:    "Tokyo",
+					City:    "Chiyoda",
+					Street:  "Kokyo",
+				},
 			},
 		},
 	}
@@ -39,7 +50,7 @@ func TestNewUser(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			out := mycmp.NewUser(tt.in.name, tt.in.age, tt.in.address)
-			if diff := cmp.Diff(tt.out, out, cmpopts.IgnoreFields(mycmp.User{}, "ID")); diff != "" {
+			if diff := cmp.Diff(tt.out, out, cmpopts.IgnoreFields(mycmp.User{}, "ID", "Address.Street")); diff != "" {
 				t.Errorf("Mismatch (-expected +actual):\n%s", diff)
 			}
 		})
@@ -115,7 +126,6 @@ func (m userMatcher) Matches(x interface{}) bool {
 		if p.String() == "ID" {
 			return true
 		}
-		fmt.Println(p.String())
 		if p.String() == "Address.Street" {
 			return true
 		}
