@@ -1,6 +1,7 @@
 package mycmp_test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -16,6 +17,7 @@ func TestNewUser(t *testing.T) {
 		name    string
 		age     int
 		address *mycmp.Address
+		cards   []mycmp.Card
 	}
 	tests := []struct {
 		name string
@@ -33,6 +35,12 @@ func TestNewUser(t *testing.T) {
 					City:    "Chiyoda",
 					Street:  "Kokyo 1-1-1",
 				},
+				cards: []mycmp.Card{
+					{
+						ID:     "1",
+						Number: "1234-5678-9012-3456",
+					},
+				},
 			},
 			out: mycmp.User{
 				Name: "alice",
@@ -43,14 +51,23 @@ func TestNewUser(t *testing.T) {
 					City:    "Chiyoda",
 					Street:  "Kokyo",
 				},
+				Cards: []mycmp.Card{
+					{
+						Number: "1234-5678-9012-3456",
+					},
+				},
 			},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			out := mycmp.NewUser(tt.in.name, tt.in.age, tt.in.address)
-			if diff := cmp.Diff(tt.out, out, cmpopts.IgnoreFields(mycmp.User{}, "ID", "Address.Street")); diff != "" {
+			out := mycmp.NewUser(tt.in.name, tt.in.age, tt.in.address, tt.in.cards)
+			if diff := cmp.Diff(tt.out, out,
+				cmpopts.IgnoreFields(mycmp.User{}, "ID"),
+				cmpopts.IgnoreFields(mycmp.Address{}, "Street"),
+				cmpopts.IgnoreFields(mycmp.Card{}, "ID"),
+			); diff != "" {
 				t.Errorf("Mismatch (-expected +actual):\n%s", diff)
 			}
 		})
@@ -123,6 +140,7 @@ func (m userMatcher) Matches(x interface{}) bool {
 
 	// 一部のフィールドを無視して他のフィールドを比較
 	return cmp.Equal(m.expected, actual, cmp.FilterPath(func(p cmp.Path) bool {
+		fmt.Println(p.String())
 		if p.String() == "ID" {
 			return true
 		}

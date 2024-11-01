@@ -8,7 +8,9 @@ type User struct {
 	Name    string
 	Age     int
 	Address Address
+	Cards   []Card
 }
+
 type Address struct {
 	ZipCode string
 	Pref    string
@@ -16,7 +18,12 @@ type Address struct {
 	Street  string
 }
 
-func NewUser(name string, age int, addr *Address) User {
+type Card struct {
+	ID     string
+	Number string
+}
+
+func NewUser(name string, age int, addr *Address, cards []Card) User {
 	u := User{
 		ID:   uuid.New().String(),
 		Name: name,
@@ -24,6 +31,9 @@ func NewUser(name string, age int, addr *Address) User {
 	}
 	if addr != nil {
 		u.Address = *addr
+	}
+	if cards != nil {
+		u.Cards = cards
 	}
 	return u
 }
@@ -42,7 +52,7 @@ func NewUserService(repo UserRepository) UserService {
 
 func (s UserService) Save(name string, age int, addr *Address) error {
 	// UUIDを生成してIDにセット
-	u := NewUser(name, age, addr)
+	u := NewUser(name, age, addr, nil)
 
 	// ユーザー情報を保存
 	err := s.repo.Save(u)
