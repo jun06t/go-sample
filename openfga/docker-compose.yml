@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: openfga
+    networks:
+      - openfga
+
+  openfga:
+    image: openfga/openfga
+    container_name: openfga
+    command: >
+      run
+      --datastore-engine mysql
+      --datastore-uri 'root:secret@tcp(mysql:3306)/openfga?parseTime=true'
+    depends_on:
+      - mysql
+    ports:
+      - "3000:3000"
+      - "8080:8080"
+      - "8081:8081"
+    networks:
+      - openfga
+
+networks:
+  openfga:
+    driver: bridge
