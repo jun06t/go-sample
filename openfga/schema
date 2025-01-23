@@ -1,0 +1,10 @@
+model
+  schema 1.1
+
+type user
+
+type api
+  relations
+    define owner: [user]
+    define viewer: [user]
+    define editor: [user]

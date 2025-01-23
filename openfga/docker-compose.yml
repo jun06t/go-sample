@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   mysql:
@@ -7,6 +7,18 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: secret
       MYSQL_DATABASE: openfga
+    networks:
+      - openfga
+  # ★ マイグレーション専用サービスを定義
+  openfga-migrate:
+    image: openfga/openfga
+    container_name: openfga-migrate
+    command: >
+      migrate
+      --datastore-engine mysql
+      --datastore-uri 'root:secret@tcp(mysql:3306)/openfga?parseTime=true'
+    depends_on:
+      - mysql
     networks:
       - openfga
 
