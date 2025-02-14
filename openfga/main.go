@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/golang-jwt/jwt/v4"
@@ -12,13 +13,14 @@ import (
 )
 
 const (
-	endpoint = "http://localhost:8080/v1/data/app/rbac/allow"
+	apiURL = "http://127.0.0.1:8080"
+	storeID = "01JJ7TD9J1T5H03V6V4H0PH37P"
 )
 
 func main() {
 	r := chi.NewRouter()
 
-	// 本来リクエストから取得すべきJWTオブジェクトを、簡単のため埋め込むミドルウェアを追加
+	// 簡単のため、本来リクエストから取得すべきJWTオブジェクトを埋め込む
 	r.Use(embedJWT)
 
 	r.Route("/articles", func(r chi.Router) {
@@ -58,7 +60,7 @@ func main() {
 func get(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprint(w, fmt.Sprintf("got %s\n", id))
+	fmt.Fprintf(w, "got %s\n", id)
 }
 
 func list(w http.ResponseWriter, r *http.Request) {
@@ -74,23 +76,26 @@ func create(w http.ResponseWriter, r *http.Request) {
 func update(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprint(w, fmt.Sprintf("updated %s\n", id))
+	fmt.Fprintf(w, "updated %s\n", id)
 }
 
 func del(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprint(w, fmt.Sprintf("deleted %s\n", id))
+	fmt.Fprintf(w, "deleted %s\n", id)
 }
 
 func embedJWT(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		userName := r.Header.Get("X-User")
 		claims := jwt.MapClaims{
-			"name": "alice",
+			"sub": userName,
+			"iss": "example.com",
+			"exp": time.Now().Add(time.Hour * 72).Unix(),
 		}
 		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
-		ctx := context.WithValue(r.Context(), "user", token)
+		ctx := context.WithValue(r.Context(), "jwt", token)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
@@ -98,16 +103,16 @@ func embedJWT(next http.Handler) http.Handler {
 func preauthorize(resource string) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			user := r.Context().Value("user").(*jwt.Token)
-			claims := user.Claims.(jwt.MapClaims)
-			name := claims["name"].(string)
-			ctx := context.WithValue(r.Context(), "username", name)
+			token := r.Context().Value("jwt").(*jwt.Token)
+			claims := token.Claims.(jwt.MapClaims)
+			user := claims["sub"].(string)
+			ctx := context.WithValue(r.Context(), "user", user)
 
 			var relation string
 			switch r.Method {
 			case "GET":
 				relation = "viewer"
-			case "POST":
+			case "POST", "PUT":
 				relation = "editor"
 			case "DELETE":
 				relation = "owner"
@@ -127,8 +132,8 @@ func preauthorize(resource string) func(next http.Handler) http.Handler {
 func checkAuthorization(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		fgaClient, err := NewSdkClient(&ClientConfiguration{
-			ApiUrl:  "http://127.0.0.1:8080",
-			StoreId: "01JJ7TD9J1T5H03V6V4H0PH37P",
+			ApiUrl:  apiURL,
+			StoreId: storeID,
 		})
 		if err != nil {
 			log.Printf("%#v\n", err)
@@ -136,12 +141,12 @@ func checkAuthorization(next http.Handler) http.Handler {
 			return
 		}
 
-		username := r.Context().Value("username").(string)
+		user := r.Context().Value("user").(string)
 		relation := r.Context().Value("relation").(string)
 		object := r.Context().Value("object").(string)
 
 		body := ClientCheckRequest{
-			User:     "user:" + username,
+			User:     "user:" + user,
 			Relation: relation,
 			Object:   object,
 		}

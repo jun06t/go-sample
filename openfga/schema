@@ -6,5 +6,5 @@ type user
 type api
   relations
     define owner: [user]
-    define viewer: [user]
-    define editor: [user]
+    define editor: [user] or owner
+    define viewer: [user] or editor
