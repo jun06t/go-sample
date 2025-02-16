@@ -1,0 +1,46 @@
+@startuml
+title OpenFeature データモデル
+
+hide empty methods
+
+class FeatureFlag {
+  +flagKey: String
+  +variants: List<Variant>
+  +defaultVariant: Variant
+}
+
+class Variant {
+  +name: String
+  +value: Object
+}
+
+class Targeting {
+  +rules: List<Rule>
+  +fractionalEvaluation: FractionalEvaluation [0..1]
+}
+
+class Rule {
+  +targetingKey: String
+  +condition: String
+}
+
+class FractionalEvaluation {
+  +distribution: Map<Variant, Integer>
+}
+
+note right of FractionalEvaluation
+例:
+{
+  "on": 50,
+  "off": 50
+}
+end note
+
+FeatureFlag ||--o{ Variant : "has variants"
+FeatureFlag ||--o{ Targeting : "has targeting rules"
+FeatureFlag ||--|| Variant : "default variant"
+Variant }|--o{ Rule
+Targeting ||--o{ Rule : "contains"
+Targeting ||--o| FractionalEvaluation : "may include"
+
+@enduml
