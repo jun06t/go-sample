@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatGPT-like Streaming Demo</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>ChatGPT-like Streaming Demo</h1>
+    <div class="chat-container">
+        <div id="message" class="message"></div>
+    </div>
+    <div class="controls">
+        <button onclick="startStream()" id="startBtn">Start Streaming</button>
+        <button onclick="stopStream()" id="stopBtn" disabled>Stop Streaming</button>
+    </div>
+    <div id="status" class="status"></div>
+
+    <script src="app.js"></script>
+</body>
+</html> 
