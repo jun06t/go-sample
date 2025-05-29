@@ -61,7 +61,6 @@ func getChunk(chunkIndex int) Message {
 
 func main() {
 	http.HandleFunc("/stream", handleStream)
-	http.Handle("/", http.FileServer(http.Dir("../client")))
 
 	log.Println("Server starting on :8080...")
 	if err := http.ListenAndServe(":8080", nil); err != nil {
