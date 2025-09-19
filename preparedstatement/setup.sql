@@ -1,15 +1,3 @@
--- 既存テーブル削除
-DROP TABLE IF EXISTS users;
-
--- ユーザーテーブル作成
-CREATE TABLE users (
-    id SERIAL PRIMARY KEY,
-    name   TEXT NOT NULL,
-    email  TEXT NOT NULL UNIQUE,
-    status TEXT NOT NULL
-);
-
--- インデックス作成
 -- 1. email による検索用
 CREATE INDEX idx_users_email ON users(email);
 
