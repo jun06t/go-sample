@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"testing"
 
 	_ "github.com/lib/pq"
@@ -20,8 +21,11 @@ func BenchmarkSelectWithQuery(b *testing.B) {
 	db := connectTestDB(b)
 	defer db.Close()
 
-	email := "user100@example.com"
+	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
+		// email を変化させる
+		email := fmt.Sprintf("user%d@example.com", i%5000)
+
 		rows, err := db.Query(`SELECT id, name FROM users WHERE email = $1 AND status = 'active'`, email)
 		if err != nil {
 			b.Fatal(err)
@@ -45,8 +49,11 @@ func BenchmarkSelectWithPrepared(b *testing.B) {
 	}
 	defer stmt.Close()
 
-	email := "user100@example.com"
+	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
+		// email を変化させる
+		email := fmt.Sprintf("user%d@example.com", i%5000)
+
 		rows, err := stmt.Query(email)
 		if err != nil {
 			b.Fatal(err)
