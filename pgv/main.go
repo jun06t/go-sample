@@ -5,7 +5,6 @@ import (
 	"log"
 
 	"github.com/jun06t/go-sample/pgv/user"
-	"google.golang.org/protobuf/proto"
 )
 
 func main() {
@@ -176,3 +175,4 @@ func printUser(u *user.User) {
 	if len(u.Tags) > 0 {
 		fmt.Printf("  タグ: %v\n", u.Tags)
 	}
+}

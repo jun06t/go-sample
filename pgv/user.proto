@@ -70,11 +70,13 @@ message Address {
   
   // 番地（オプション、1-200文字）
   string street = 4 [(validate.rules).string = {
-    max_len: 200
+    max_len: 200,
+    ignore_empty: true
   }];
   
   // 郵便番号（オプション、7桁の数字）
   string postal_code = 5 [(validate.rules).string = {
-    pattern: "^[0-9]{7}$"
+    pattern: "^[0-9]{7}$",
+    ignore_empty: true
   }];
 }

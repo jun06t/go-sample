@@ -2,15 +2,14 @@
 
 # 変数定義
 PROTO_DIR := .
-GO_OUT_DIR := .
+GO_OUT_DIR := user
 PROTOC := protoc
 PROTOC_GEN_GO := protoc-gen-go
 PROTOC_GEN_GO_GRPC := protoc-gen-go-grpc
 PROTOC_GEN_VALIDATE := protoc-gen-validate
 
-# Go modulesのパスを取得
-VALIDATE_PROTO_PATH := $(shell go list -m -f '{{.Dir}}' github.com/envoyproxy/protoc-gen-validate)
-
+# validate.protoファイルのパス（GOPATH固定）
+VALIDATE_PROTO_PATH := $(GOPATH)/pkg/mod/github.com/envoyproxy/protoc-gen-validate@v1.2.1
 # 依存関係のインストール
 .PHONY: install-deps
 install-deps:
@@ -22,16 +21,15 @@ install-deps:
 
 # protoファイルからGoコードを生成
 .PHONY: generate
-generate: install-deps
+generate:
 	@echo "protoファイルからGoコードを生成中..."
+	@mkdir -p $(GO_OUT_DIR)
 	$(PROTOC) \
-		--proto_path=. \
-		--proto_path=$(VALIDATE_PROTO_PATH) \
-		--go_out=$(GO_OUT_DIR) \
-		--go_opt=paths=source_relative \
-		--go-grpc_out=$(GO_OUT_DIR) \
-		--go-grpc_opt=paths=source_relative \
-		--validate_out="lang=go:$(GO_OUT_DIR)" \
+		-I. \
+		-I$(VALIDATE_PROTO_PATH) \
+		--go_out=. \
+		--go_opt=module=github.com/jun06t/go-sample/pgv \
+		--validate_out="lang=go,module=github.com/jun06t/go-sample/pgv:." \
 		user.proto
 	@echo "コード生成完了！"
 
@@ -39,8 +37,8 @@ generate: install-deps
 .PHONY: clean
 clean:
 	@echo "生成されたファイルを削除中..."
-	rm -f user/*.pb.go
-	rm -f user/*_validate.pb.go
+	rm -f $(GO_OUT_DIR)/*.pb.go
+	rm -f $(GO_OUT_DIR)/*_validate.pb.go
 	@echo "クリーンアップ完了！"
 
 # サンプルプログラムを実行
