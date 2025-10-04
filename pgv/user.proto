@@ -1,0 +1,80 @@
+syntax = "proto3";
+
+package user;
+
+import "validate/validate.proto";
+
+option go_package = "github.com/jun06t/go-sample/pgv/user";
+
+// ユーザー情報を表すメッセージ
+message User {
+  // ユーザーID（必須、正の整数）
+  int64 id = 1 [(validate.rules).int64.gt = 0];
+  
+  // ユーザー名（必須、3-20文字）
+  string name = 2 [(validate.rules).string = {
+    min_len: 3,
+    max_len: 20,
+    pattern: "^[a-zA-Z0-9_]+$"
+  }];
+  
+  // メールアドレス（必須、有効なメール形式）
+  string email = 3 [(validate.rules).string.email = true];
+  
+  // 年齢（18-120歳）
+  int32 age = 4 [(validate.rules).int32 = {
+    gte: 18,
+    lte: 120
+  }];
+  
+  // 電話番号（オプション、10桁の数字）
+  string phone = 5 [(validate.rules).string = {
+    pattern: "^[0-9]{10}$",
+    ignore_empty: true
+  }];
+  
+  // 住所情報（必須）
+  Address address = 6 [(validate.rules).message.required = true];
+  
+  // タグ（複数、各タグは1-10文字）
+  repeated string tags = 7 [(validate.rules).repeated = {
+    items: {
+      string: {
+        min_len: 1,
+        max_len: 10
+      }
+    },
+    max_items: 5
+  }];
+}
+
+// 住所情報
+message Address {
+  // 国（必須、2文字の国コード）
+  string country = 1 [(validate.rules).string = {
+    len: 2,
+    pattern: "^[A-Z]{2}$"
+  }];
+  
+  // 都道府県（必須、1-50文字）
+  string prefecture = 2 [(validate.rules).string = {
+    min_len: 1,
+    max_len: 50
+  }];
+  
+  // 市区町村（必須、1-100文字）
+  string city = 3 [(validate.rules).string = {
+    min_len: 1,
+    max_len: 100
+  }];
+  
+  // 番地（オプション、1-200文字）
+  string street = 4 [(validate.rules).string = {
+    max_len: 200
+  }];
+  
+  // 郵便番号（オプション、7桁の数字）
+  string postal_code = 5 [(validate.rules).string = {
+    pattern: "^[0-9]{7}$"
+  }];
+}
