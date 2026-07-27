@@ -23,7 +23,11 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
-	err := openfeature.SetNamedProviderAndWait("my-domain", flagd.NewProvider())
+	provider, err := flagd.NewProvider()
+	if err != nil {
+		log.Fatalf("Failed to create the flagd provider: %v", err)
+	}
+	err = openfeature.SetNamedProviderAndWait("my-domain", provider)
 	if err != nil {
 		log.Fatalf("Failed to set the OpenFeature provider: %v", err)
 	}
