@@ -1,3 +1,6 @@
+//go:build wireinject
+// +build wireinject
+
 package user
 
 import "github.com/google/wire"
